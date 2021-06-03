@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "233198149197",
+    "project_id": "evenager",
+    "storage_bucket": "evenager.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:233198149197:android:3e7a5a984ff125e9088604",
+        "android_client_info": {
+          "package_name": "com.example.evenager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "233198149197-qcqfmdopq1os7qf0s1r42uun0fhs6s3p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6uCHSR2OJ6wkCDZcgiLzexSLh59Fr2Fc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "233198149197-qcqfmdopq1os7qf0s1r42uun0fhs6s3p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
