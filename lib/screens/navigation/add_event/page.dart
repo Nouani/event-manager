@@ -234,7 +234,7 @@ class _AddEventState extends State<AddEvent> {
                       teamId: dropdownTeamId,
                     );
                     log(data.responsibleMeeting);
-                    // EventService.insertEvent(data);
+                    EventService.insertEvent(data);
                     _cleanFields();
                   },
                   style: ButtonStyle(
