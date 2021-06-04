@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
         )
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Evenager',
         theme: ThemeData(
           primarySwatch: Colors.blue,

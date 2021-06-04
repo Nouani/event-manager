@@ -16,7 +16,7 @@ class EmployeeService {
           surname: value.data()!["surname"],
           photoUrl: value.data()!["photoUrl"],
           departmentId: value.data()!["departmentId"],
-          teamId: value.data()!["departmentId"]);
+          teamId: value.data()!["teamId"]);
     });
   }
 

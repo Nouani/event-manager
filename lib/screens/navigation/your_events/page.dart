@@ -46,18 +46,36 @@ class _YourEventsState extends State<YourEvents> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                margin: EdgeInsets.only(top: 50, bottom: 40),
+                margin: EdgeInsets.only(top: 70, bottom: 40),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Ola, ${employee.surname}",
+                          "Olá, ${employee.surname}",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 35,
                             color: Color.fromRGBO(130, 25, 227, 1),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.read<AuthenticationService>().signOut();
+                          },
+                          child: Icon(Icons.exit_to_app),
+                          style: ButtonStyle(
+                            elevation: MaterialStateProperty.all(0),
+                            backgroundColor:
+                                MaterialStateProperty.all(Colors.red[800]),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(30))),
+                            ),
                           ),
                         ),
                       ],
@@ -65,7 +83,7 @@ class _YourEventsState extends State<YourEvents> {
                     Text(
                       "Aqui estão seus eventos",
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         fontSize: 25,
                         color: Colors.grey,
                       ),
@@ -80,15 +98,15 @@ class _YourEventsState extends State<YourEvents> {
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
                       fontSize: 20,
-                      color: Colors.grey,
+                      color: Colors.black54,
                     ),
                   ),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(30),
                     child: Image.network(
                       employee.photoUrl,
-                      height: 25,
-                      width: 25,
+                      height: 35,
+                      width: 35,
                     ),
                   )
                 ],
@@ -97,40 +115,108 @@ class _YourEventsState extends State<YourEvents> {
                 height: 20,
               ),
               StreamBuilder<Iterable<Event>?>(
-                  stream: FirebaseFirestore.instance
-                      .collection("events")
-                      .where("responsibleMeeting", isEqualTo: employee.id)
-                      .snapshots()
-                      .map((event) {
-                    return event.docs.map((e) {
-                      return Event(
-                          id: e.id,
-                          responsibleMeeting: e.data()["responsibleMeeting"],
-                          eventType: e.data()["eventType"],
-                          eventLocation: e.data()["eventLocation"],
-                          eventDay: e.data()["eventDay"],
-                          eventTime: e.data()["eventTime"],
-                          departmentId: e.data()["departmentId"],
-                          teamId: e.data()["teamId"]);
-                    });
-                  }),
-                  builder: (context, snapshots) {
-                    final events = snapshots.data;
+                stream: FirebaseFirestore.instance
+                    .collection("events")
+                    .where("responsibleMeeting", isEqualTo: employee.id)
+                    .snapshots()
+                    .map((event) {
+                  return event.docs.map((e) {
+                    return Event(
+                        id: e.id,
+                        responsibleMeeting: e.data()["responsibleMeeting"],
+                        eventType: e.data()["eventType"],
+                        eventLocation: e.data()["eventLocation"],
+                        eventDay: e.data()["eventDay"],
+                        eventTime: e.data()["eventTime"],
+                        departmentId: e.data()["departmentId"],
+                        teamId: e.data()["teamId"]);
+                  });
+                }),
+                builder: (context, snapshots) {
+                  final events = snapshots.data;
 
-                    if (events!.isEmpty) {
-                      return Text("Not found list");
-                    }
-
-                    return SizedBox(
-                      height: 150, // constrain height
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: events.map((e) {
-                          return _buildYourEvents(e);
-                        }).toList(),
+                  if (events!.isEmpty) {
+                    return Text(
+                      "Nenhum evento encontrado :(",
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        color: Colors.grey,
                       ),
                     );
-                  }),
+                  }
+
+                  return SizedBox(
+                    height: 150, // constrain height
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: events.map((e) {
+                        return _buildYourEvents(e, true);
+                      }).toList(),
+                    ),
+                  );
+                },
+              ),
+              SizedBox(
+                height: 50,
+              ),
+              Row(
+                children: [
+                  Text(
+                    "Você está participando",
+                    style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontSize: 20,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              StreamBuilder<Iterable<Event>?>(
+                stream: FirebaseFirestore.instance
+                    .collection("events")
+                    .where("departmentId", isEqualTo: employee.departmentId)
+                    .where("teamId", isEqualTo: employee.teamId)
+                    .snapshots()
+                    .map((event) {
+                  return event.docs.map((e) {
+                    return Event(
+                        id: e.id,
+                        responsibleMeeting: e.data()["responsibleMeeting"],
+                        eventType: e.data()["eventType"],
+                        eventLocation: e.data()["eventLocation"],
+                        eventDay: e.data()["eventDay"],
+                        eventTime: e.data()["eventTime"],
+                        departmentId: e.data()["departmentId"],
+                        teamId: e.data()["teamId"]);
+                  });
+                }),
+                builder: (context, snapshots) {
+                  final events = snapshots.data;
+
+                  if (events!.isEmpty) {
+                    return Text(
+                      "Nenhum evento encontrado :(",
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        color: Colors.grey,
+                      ),
+                    );
+                  }
+
+                  return SizedBox(
+                    height: 150, // constrain height
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: events.map((e) {
+                        return _buildYourEvents(e, false);
+                      }).toList(),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -138,7 +224,7 @@ class _YourEventsState extends State<YourEvents> {
     );
   }
 
-  GestureDetector _buildYourEvents(Event e) {
+  GestureDetector _buildYourEvents(Event e, bool isResponsibleMeeting) {
     return GestureDetector(
       onTap: () {
         showDialog<void>(
@@ -146,6 +232,7 @@ class _YourEventsState extends State<YourEvents> {
           builder: (BuildContext context) {
             return MoreInfoDialog(
               event: e,
+              isResponsibleMeeting: isResponsibleMeeting,
             );
           },
         );
@@ -201,9 +288,11 @@ class MoreInfoDialog extends StatefulWidget {
   const MoreInfoDialog({
     Key? key,
     required this.event,
+    required this.isResponsibleMeeting,
   }) : super(key: key);
 
   final Event event;
+  final bool isResponsibleMeeting;
 
   @override
   _MoreInfoDialogState createState() => _MoreInfoDialogState();
@@ -237,6 +326,16 @@ class _MoreInfoDialogState extends State<MoreInfoDialog> {
       (value) => setState(() {
         employees = value.toList();
       }),
+    );
+
+    EmployeeService.getEmployeeById(widget.event.responsibleMeeting).then(
+      (value) {
+        List<Employee> data = employees;
+        data.add(value);
+        setState(() {
+          employees = data;
+        });
+      },
     );
   }
 
@@ -353,51 +452,53 @@ class _MoreInfoDialogState extends State<MoreInfoDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        EventService.removeEvent(widget.event.id)
-                            .then((value) => Navigator.of(context).pop());
-                      },
-                      child: Icon(
-                        Icons.delete,
-                      ),
-                      style: ButtonStyle(
-                        elevation: MaterialStateProperty.all(0),
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.red[800]),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: Icon(
-                        Icons.edit,
-                      ),
-                      style: ButtonStyle(
-                        elevation: MaterialStateProperty.all(0),
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.purple[800]),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                widget.isResponsibleMeeting == true
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              EventService.removeEvent(widget.event.id)
+                                  .then((value) => Navigator.of(context).pop());
+                            },
+                            child: Icon(
+                              Icons.delete,
+                            ),
+                            style: ButtonStyle(
+                              elevation: MaterialStateProperty.all(0),
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.red[800]),
+                              shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10))),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          ElevatedButton(
+                            onPressed: () {},
+                            child: Icon(
+                              Icons.edit,
+                            ),
+                            style: ButtonStyle(
+                              elevation: MaterialStateProperty.all(0),
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.purple[800]),
+                              shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10))),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : SizedBox(),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [

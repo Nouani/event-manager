@@ -27,7 +27,7 @@ class _NavigationState extends State<Navigation> {
 
   @override
   Widget build(BuildContext context) {
-    log("TESTE");
+    log("User id:");
     log(context.read<AuthenticationService>().userUid.toString());
     return Scaffold(
       /*appBar: AppBar(
