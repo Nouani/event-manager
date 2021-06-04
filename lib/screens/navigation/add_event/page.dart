@@ -1,7 +1,11 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:evenager/data/department.dart';
 import 'package:evenager/data/event.dart';
+import 'package:evenager/data/eventLocation.dart';
+import 'package:evenager/data/eventType.dart';
+import 'package:evenager/data/team.dart';
 import 'package:evenager/services/authentication_service.dart';
 import 'package:evenager/services/department_service.dart';
 import 'package:evenager/services/employee_service.dart';
@@ -9,6 +13,8 @@ import 'package:evenager/services/event_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:sms/sms.dart';
+import 'package:toast/toast.dart';
 
 class AddEvent extends StatefulWidget {
   @override
@@ -17,7 +23,7 @@ class AddEvent extends StatefulWidget {
 
 class _AddEventState extends State<AddEvent> {
   DateTime _selectedDate = DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay(hour: 0, minute: 0);
+  TimeOfDay _selectedTime = TimeOfDay.now();
 
   String dropdownEventType = "";
   String dropdownEventLocation = "";
@@ -30,6 +36,8 @@ class _AddEventState extends State<AddEvent> {
 
   TextEditingController txtDate = TextEditingController();
   TextEditingController txtTime = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -145,118 +153,140 @@ class _AddEventState extends State<AddEvent> {
                   ],
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(bottom: 50),
-                padding: EdgeInsets.all(15.0),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Color.fromRGBO(200, 200, 200, 0.6),
-                  ),
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                ),
+              Form(
+                key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Data do evento",
-                          style: TextStyle(
-                            fontWeight: FontWeight.normal,
-                            fontSize: 20,
-                            color: Color.fromRGBO(160, 65, 240, 1),
-                          ),
+                    Container(
+                      margin: EdgeInsets.only(bottom: 50),
+                      padding: EdgeInsets.all(15.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Color.fromRGBO(200, 200, 200, 0.6),
                         ),
-                        TextField(
-                          readOnly: true,
-                          decoration: _getDefaultInputDecoration(),
-                          style: TextStyle(
-                            color: Color.fromRGBO(160, 65, 240, 1),
-                            fontSize: 15,
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Data do evento",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 20,
+                                  color: Color.fromRGBO(160, 65, 240, 1),
+                                ),
+                              ),
+                              TextFormField(
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Campo obrigatório';
+                                  }
+                                  return null;
+                                },
+                                readOnly: true,
+                                decoration: _getDefaultInputDecoration(),
+                                style: TextStyle(
+                                  color: Color.fromRGBO(160, 65, 240, 1),
+                                  fontSize: 15,
+                                ),
+                                controller: txtDate,
+                                onTap: () {
+                                  _selectDate(context);
+                                },
+                              ),
+                            ],
                           ),
-                          controller: txtDate,
-                          onTap: () {
-                            _selectDate(context);
-                          },
-                        ),
-                      ],
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Horário do evento",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 20,
+                                  color: Color.fromRGBO(160, 65, 240, 1),
+                                ),
+                              ),
+                              TextFormField(
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Campo obrigatório';
+                                  }
+                                  return null;
+                                },
+                                readOnly: true,
+                                decoration: _getDefaultInputDecoration(),
+                                style: TextStyle(
+                                  color: Color.fromRGBO(160, 65, 240, 1),
+                                  fontSize: 15,
+                                ),
+                                controller: txtTime,
+                                onTap: () {
+                                  _selectTime(context);
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Horário do evento",
+                    Container(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          // Validate returns true if the form is valid, or false otherwise.
+                          if (_formKey.currentState!.validate()) {
+                            // If the form is valid, display a snackbar. In the real world,
+                            // you'd often call a server or save the information in a database.
+
+                            final data = new Event(
+                              id: "",
+                              responsibleMeeting: context
+                                  .read<AuthenticationService>()
+                                  .userUid
+                                  .toString(),
+                              eventType: dropdownEventType,
+                              eventLocation: dropdownEventLocation,
+                              eventDay: DateFormat('dd-MM-yyyy')
+                                  .format(_selectedDate),
+                              eventTime: _selectedTime.format(context),
+                              departmentId: dropdownDepartmentId,
+                              teamId: dropdownTeamId,
+                            );
+
+                            submitData(data);
+                          }
+                        },
+                        style: ButtonStyle(
+                          padding:
+                              MaterialStateProperty.all(EdgeInsets.all(15)),
+                          shape: MaterialStateProperty.all(
+                            RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15)),
+                          ),
+                          backgroundColor: MaterialStateProperty.all(
+                              Color.fromRGBO(160, 65, 240, 1)),
+                        ),
+                        child: Text(
+                          "AGENDAR",
                           style: TextStyle(
-                            fontWeight: FontWeight.normal,
-                            fontSize: 20,
-                            color: Color.fromRGBO(160, 65, 240, 1),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            letterSpacing: 2.5,
+                            fontFamily: "OpenSans",
                           ),
                         ),
-                        TextField(
-                          readOnly: true,
-                          decoration: _getDefaultInputDecoration(),
-                          style: TextStyle(
-                            color: Color.fromRGBO(160, 65, 240, 1),
-                            fontSize: 15,
-                          ),
-                          controller: txtTime,
-                          onTap: () {
-                            _selectTime(context);
-                          },
-                        ),
-                      ],
+                      ),
                     ),
                   ],
-                ),
-              ),
-              Container(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    log(context
-                        .read<AuthenticationService>()
-                        .userUid
-                        .toString());
-                    final data = new Event(
-                      id: "",
-                      responsibleMeeting: context
-                          .read<AuthenticationService>()
-                          .userUid
-                          .toString(),
-                      eventType: dropdownEventType,
-                      eventLocation: dropdownEventLocation,
-                      eventDay: DateFormat('dd-MM-yyyy').format(_selectedDate),
-                      eventTime: _selectedTime.format(context),
-                      departmentId: dropdownDepartmentId,
-                      teamId: dropdownTeamId,
-                    );
-                    log(data.responsibleMeeting);
-                    EventService.insertEvent(data);
-                    _cleanFields();
-                  },
-                  style: ButtonStyle(
-                    padding: MaterialStateProperty.all(EdgeInsets.all(15)),
-                    shape: MaterialStateProperty.all(
-                      RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
-                    ),
-                    backgroundColor: MaterialStateProperty.all(
-                        Color.fromRGBO(160, 65, 240, 1)),
-                  ),
-                  child: Text(
-                    "AGENDAR",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      letterSpacing: 2.5,
-                      fontFamily: "OpenSans",
-                    ),
-                  ),
                 ),
               ),
             ],
@@ -267,53 +297,61 @@ class _AddEventState extends State<AddEvent> {
   }
 
   Widget getEventLocations() {
-    return StreamBuilder(
-      stream:
-          FirebaseFirestore.instance.collection("eventLocations").snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        var locais = snapshot.data!.docs;
-        List<DropdownMenuItem> eventLocations = getListEventLocations(locais);
+    return StreamBuilder<Iterable<EventLocation>>(
+      stream: FirebaseFirestore.instance
+          .collection("eventLocations")
+          .snapshots()
+          .map((event) => event.docs.map(
+              (e) => EventLocation(locationName: e.data()["locationName"]))),
+      builder: (BuildContext context, snapshot) {
+        var eventLocations = snapshot.data;
+
+        if (eventLocations == null) {
+          return SizedBox();
+        }
+
         if (!snapshot.hasData) {
-          return Container(
-            child: Text("No data found"),
-          );
-        } else {
-          return DropdownButton(
-            hint: Text(
-              dropdownEventLocation,
-              style: TextStyle(
-                color: Color.fromRGBO(130, 25, 227, 1),
-              ),
-            ),
-            // value: dropdownLocal,
-            icon: Icon(
-              Icons.place,
-              color: Color.fromRGBO(130, 25, 227, 1),
-            ),
-            iconSize: 24,
-            isExpanded: true,
-            elevation: 16,
+          return Text("No data found");
+        }
+
+        List<DropdownMenuItem> listEventLocations =
+            getListEventLocations(eventLocations.toList());
+
+        return DropdownButton(
+          hint: Text(
+            dropdownEventLocation,
             style: TextStyle(
               color: Color.fromRGBO(130, 25, 227, 1),
             ),
-            onChanged: (dynamic newValue) {
-              setState(() {
-                dropdownEventLocation = newValue.toString();
-              });
-            },
-            items: eventLocations,
-          );
-        }
+          ),
+          // value: dropdownLocal,
+          icon: Icon(
+            Icons.place,
+            color: Color.fromRGBO(130, 25, 227, 1),
+          ),
+          iconSize: 24,
+          isExpanded: true,
+          elevation: 16,
+          style: TextStyle(
+            color: Color.fromRGBO(130, 25, 227, 1),
+          ),
+          onChanged: (dynamic newValue) {
+            setState(() {
+              dropdownEventLocation = newValue.toString();
+            });
+          },
+          items: listEventLocations,
+        );
       },
     );
   }
 
-  List<DropdownMenuItem<String>> getListEventLocations(locais) {
+  List<DropdownMenuItem<String>> getListEventLocations(
+      List<EventLocation> locais) {
     List<DropdownMenuItem<String>> ret = [];
     for (int i = 0; i < locais.length; i++) {
       ret.add(DropdownMenuItem(
-          child: Text(locais[i].data()["locationName"]),
-          value: locais[i].data()["locationName"]));
+          child: Text(locais[i].locationName), value: locais[i].locationName));
     }
     return ret;
   }
@@ -322,52 +360,61 @@ class _AddEventState extends State<AddEvent> {
   /////////////////////////////////////////////////////////////////////////
 
   Widget getEventTypes() {
-    return StreamBuilder(
-      stream: FirebaseFirestore.instance.collection("eventTypes").snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        var tipos = snapshot.data!.docs;
-        List<DropdownMenuItem> eventTypes = getListEventTypes(tipos);
-        if (!snapshot.hasData) {
-          return Container(
-            child: Text("No data found"),
-          );
-        } else {
-          return DropdownButton(
-            hint: Text(
-              dropdownEventType,
-              style: TextStyle(
-                color: Color.fromRGBO(130, 25, 227, 1),
-              ),
-            ),
-            // value: dropdownLocal,
-            icon: const Icon(
-              Icons.add_link,
-              color: Color.fromRGBO(130, 25, 227, 1),
-            ),
-            iconSize: 24,
-            isExpanded: true,
-            elevation: 16,
-            style: const TextStyle(
-              color: Color.fromRGBO(130, 25, 227, 1),
-            ),
-            onChanged: (dynamic newValue) {
-              setState(() {
-                dropdownEventType = newValue.toString();
-              });
-            },
-            items: eventTypes,
-          );
+    return StreamBuilder<Iterable<EventType>>(
+      stream: FirebaseFirestore.instance
+          .collection("eventTypes")
+          .snapshots()
+          .map((event) => event.docs.map(
+                (e) => EventType(eventName: e.data()["eventName"]),
+              )),
+      builder: (BuildContext context, snapshot) {
+        var eventTypes = snapshot.data;
+
+        if (eventTypes == null) {
+          return SizedBox();
         }
+
+        if (eventTypes.isEmpty) {
+          return Text("No data found");
+        }
+
+        List<DropdownMenuItem> listEventTypes =
+            getListEventTypes(eventTypes.toList());
+
+        return DropdownButton(
+          hint: Text(
+            dropdownEventType,
+            style: TextStyle(
+              color: Color.fromRGBO(130, 25, 227, 1),
+            ),
+          ),
+          // value: dropdownLocal,
+          icon: const Icon(
+            Icons.add_link,
+            color: Color.fromRGBO(130, 25, 227, 1),
+          ),
+          iconSize: 24,
+          isExpanded: true,
+          elevation: 16,
+          style: const TextStyle(
+            color: Color.fromRGBO(130, 25, 227, 1),
+          ),
+          onChanged: (dynamic newValue) {
+            setState(() {
+              dropdownEventType = newValue.toString();
+            });
+          },
+          items: listEventTypes,
+        );
       },
     );
   }
 
-  List<DropdownMenuItem<String>> getListEventTypes(values) {
+  List<DropdownMenuItem<String>> getListEventTypes(List<EventType> values) {
     List<DropdownMenuItem<String>> ret = [];
     for (int i = 0; i < values.length; i++) {
       ret.add(DropdownMenuItem(
-          child: Text(values[i].data()["eventName"]),
-          value: values[i].data()["eventName"]));
+          child: Text(values[i].eventName), value: values[i].eventName));
     }
     return ret;
   }
@@ -376,60 +423,69 @@ class _AddEventState extends State<AddEvent> {
   /////////////////////////////////////////////////////////////////////////
 
   Widget getDepartaments() {
-    return StreamBuilder(
-      stream: FirebaseFirestore.instance.collection("departments").snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        var departments = snapshot.data!.docs;
-        List<DropdownMenuItem> listDepartments =
-            getListDepartments(departments);
-        if (!snapshot.hasData) {
+    return StreamBuilder<Iterable<Department>>(
+      stream: FirebaseFirestore.instance
+          .collection("departments")
+          .snapshots()
+          .map((event) => event.docs.map((e) => Department(
+              id: e.id, departmentName: e.data()["departmentName"]))),
+      builder: (BuildContext context, snapshot) {
+        var departments = snapshot.data;
+
+        if (departments == null) {
+          return SizedBox();
+        }
+
+        if (departments.isEmpty) {
           return Container(
             child: Text("No data found"),
           );
-        } else {
-          return DropdownButton(
-            hint: Text(
-              dropdownDepartmentSelected,
-              style: TextStyle(
-                color: Color.fromRGBO(130, 25, 227, 1),
-              ),
-            ),
-            // value: dropdownLocal,
-            icon: Icon(
-              Icons.account_tree_outlined,
-              color: Color.fromRGBO(130, 25, 227, 1),
-            ),
-            iconSize: 24,
-            isExpanded: true,
-            elevation: 16,
+        }
+
+        List<DropdownMenuItem> listDepartments =
+            getListDepartments(departments.toList());
+
+        return DropdownButton(
+          hint: Text(
+            dropdownDepartmentSelected,
             style: TextStyle(
               color: Color.fromRGBO(130, 25, 227, 1),
             ),
-            onChanged: (dynamic newValue) {
-              setState(() {
-                dropdownDepartmentId = newValue.toString();
-              });
+          ),
+          // value: dropdownLocal,
+          icon: Icon(
+            Icons.account_tree_outlined,
+            color: Color.fromRGBO(130, 25, 227, 1),
+          ),
+          iconSize: 24,
+          isExpanded: true,
+          elevation: 16,
+          style: TextStyle(
+            color: Color.fromRGBO(130, 25, 227, 1),
+          ),
+          onChanged: (dynamic newValue) {
+            setState(() {
+              dropdownDepartmentId = newValue.toString();
+            });
 
-              DepartmentService.getDepartmentById(dropdownDepartmentId)
-                  .then((value) {
-                setState(() {
-                  dropdownDepartmentSelected = value.departmentName;
-                });
+            DepartmentService.getDepartmentById(dropdownDepartmentId)
+                .then((value) {
+              setState(() {
+                dropdownDepartmentSelected = value.departmentName;
               });
-            },
-            items: listDepartments,
-          );
-        }
+            });
+          },
+          items: listDepartments,
+        );
       },
     );
   }
 
-  List<DropdownMenuItem<String>> getListDepartments(values) {
+  List<DropdownMenuItem<String>> getListDepartments(List<Department> values) {
     List<DropdownMenuItem<String>> ret = [];
     for (int i = 0; i < values.length; i++) {
       ret.add(DropdownMenuItem(
-          child: Text(values[i].data()["departmentName"]),
-          value: values[i].id));
+          child: Text(values[i].departmentName), value: values[i].id));
     }
     return ret;
   }
@@ -438,64 +494,70 @@ class _AddEventState extends State<AddEvent> {
   /////////////////////////////////////////////////////////////////////////
 
   Widget getTeams() {
-    return StreamBuilder(
+    return StreamBuilder<Iterable<Team>>(
       stream: FirebaseFirestore.instance
           .collection("departments")
           .doc(dropdownDepartmentId)
           .collection("teams")
-          .snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        var teams = snapshot.data!.docs;
-        List<DropdownMenuItem> listDepartments = getListTeams(teams);
+          .snapshots()
+          .map((event) => event.docs.map((e) => Team(
+              id: e.id,
+              teamName: e.data()["teamName"],
+              employees: e.data()["employees"]))),
+      builder: (BuildContext context, snapshot) {
+        var teams = snapshot.data;
 
-        if (!snapshot.hasData) {
-          return Container(
-            child: Text("No data found"),
-          );
-        } else {
-          return DropdownButton(
-            hint: Text(
-              dropdownTeamSelected,
-              style: TextStyle(
-                color: Color.fromRGBO(130, 25, 227, 1),
-              ),
-            ),
-            // value: dropdownLocal,
-            icon: Icon(
-              Icons.emoji_people,
-              color: Color.fromRGBO(130, 25, 227, 1),
-            ),
-            iconSize: 24,
-            isExpanded: true,
-            elevation: 16,
+        if (teams == null) {
+          return SizedBox();
+        }
+
+        if (teams.isEmpty) {
+          return Text("No data found");
+        }
+
+        List<DropdownMenuItem> listDepartments = getListTeams(teams.toList());
+
+        return DropdownButton(
+          hint: Text(
+            dropdownTeamSelected,
             style: TextStyle(
               color: Color.fromRGBO(130, 25, 227, 1),
             ),
-            onChanged: (dynamic newValue) {
-              setState(() {
-                dropdownTeamId = newValue.toString();
-              });
+          ),
+          // value: dropdownLocal,
+          icon: Icon(
+            Icons.emoji_people,
+            color: Color.fromRGBO(130, 25, 227, 1),
+          ),
+          iconSize: 24,
+          isExpanded: true,
+          elevation: 16,
+          style: TextStyle(
+            color: Color.fromRGBO(130, 25, 227, 1),
+          ),
+          onChanged: (dynamic newValue) {
+            setState(() {
+              dropdownTeamId = newValue.toString();
+            });
 
-              DepartmentService.getTeamById(
-                      dropdownDepartmentId, dropdownTeamId)
-                  .then((value) => {
-                        setState(() {
-                          dropdownTeamSelected = value.teamName;
-                        })
-                      });
-            },
-            items: listDepartments,
-          );
-        }
+            DepartmentService.getTeamById(dropdownDepartmentId, dropdownTeamId)
+                .then((value) => {
+                      setState(() {
+                        dropdownTeamSelected = value.teamName;
+                      })
+                    });
+          },
+          items: listDepartments,
+        );
       },
     );
   }
 
-  List<DropdownMenuItem<String>> getListTeams(values) {
+  List<DropdownMenuItem<String>> getListTeams(List<Team> values) {
     List<DropdownMenuItem<String>> ret = [];
     for (int i = 0; i < values.length; i++) {
       ret.add(DropdownMenuItem(
-          child: Text(values[i].data()["teamName"]), value: values[i].id));
+          child: Text(values[i].teamName), value: values[i].id));
     }
     return ret;
   }
@@ -546,6 +608,50 @@ class _AddEventState extends State<AddEvent> {
         borderSide: BorderSide(color: Color.fromRGBO(160, 65, 240, 1)),
       ),
     );
+  }
+
+  void submitData(Event data) {
+    activeToastMessage("Processando...", Duration(seconds: 1));
+
+    /*SmsSender sender = new SmsSender();
+    EventService.insertEvent(data).then((value) => {
+          activeToastMessage(
+              "Evento agendado com sucesso!", Duration(seconds: 1)),
+        });*/
+
+    EmployeeService.getEmployeesEqualDepartmentAndTeam(
+            data.departmentId, data.teamId)
+        .then((value) => {
+              /*activeToastMessage(
+                  "Notificando convidados", Duration(seconds: 3)),
+              log("teste2"),*/
+              value.map((e) async => {
+                    /*await sender
+                              .sendSms(new SmsMessage(e.phoneNumber, 'teste'))*/
+                    log("teste"),
+                    log("Notificando => ${e.name}")
+                  }),
+            });
+
+    /*SmsSender sender = new SmsSender();
+    EmployeeService.getEmployeesEqualDepartmentAndTeam(
+            data.departmentId, data.teamId)
+        .then((value) => {
+              value.map((e) async => {
+                    await sender
+                        .sendSms(new SmsMessage('e.numberPhone', 'teste'))
+                  })
+            });*/
+
+    // _cleanFields();
+  }
+
+  void activeToastMessage(String message, Duration duration) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.green[500],
+      duration: duration,
+    ));
   }
 
   void _cleanFields() {

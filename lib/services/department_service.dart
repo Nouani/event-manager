@@ -10,8 +10,8 @@ class DepartmentService {
         .collection("departments")
         .doc(id)
         .get()
-        .then((value) =>
-            Department(departmentName: value.data()!["departmentName"]));
+        .then((value) => Department(
+            id: value.id, departmentName: value.data()!["departmentName"]));
   }
 
   static Future<Team> getTeamById(String departmentId, String teamId) async {
@@ -22,6 +22,7 @@ class DepartmentService {
         .doc(teamId)
         .get()
         .then((value) => Team(
+            id: value.id,
             teamName: value.data()!["teamName"],
             employees: value.data()!["employees"]));
   }

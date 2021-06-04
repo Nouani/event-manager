@@ -11,12 +11,14 @@ class EmployeeService {
         .get()
         .then((value) {
       return Employee(
-          id: value.id,
-          name: value.data()!["name"],
-          surname: value.data()!["surname"],
-          photoUrl: value.data()!["photoUrl"],
-          departmentId: value.data()!["departmentId"],
-          teamId: value.data()!["teamId"]);
+        id: value.id,
+        name: value.data()!["name"],
+        surname: value.data()!["surname"],
+        photoUrl: value.data()!["photoUrl"],
+        departmentId: value.data()!["departmentId"],
+        teamId: value.data()!["teamId"],
+        phoneNumber: value.data()!["phoneNumber"],
+      );
     });
   }
 
@@ -30,12 +32,14 @@ class EmployeeService {
         .then(
           (value) => value.docs.map((e) {
             return Employee(
-                id: e.id,
-                name: e.data()["name"],
-                surname: e.data()["surname"],
-                photoUrl: e.data()["photoUrl"],
-                departmentId: e.data()["departmentId"],
-                teamId: e.data()["departmentId"]);
+              id: e.id,
+              name: e.data()["name"],
+              surname: e.data()["surname"],
+              photoUrl: e.data()["photoUrl"],
+              departmentId: e.data()["departmentId"],
+              teamId: e.data()["departmentId"],
+              phoneNumber: e.data()["phoneNumber"],
+            );
           }),
         );
   }

@@ -5,6 +5,7 @@ class Employee {
   final String photoUrl;
   final String departmentId;
   final String teamId;
+  final String phoneNumber;
 
   Employee({
     required this.id,
@@ -13,6 +14,7 @@ class Employee {
     required this.photoUrl,
     required this.departmentId,
     required this.teamId,
+    required this.phoneNumber,
   });
 
   @override
@@ -23,5 +25,6 @@ class Employee {
         photoUrl,
         departmentId,
         teamId,
+        phoneNumber,
       ];
 }

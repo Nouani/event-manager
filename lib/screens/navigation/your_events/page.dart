@@ -18,7 +18,14 @@ class YourEvents extends StatefulWidget {
 }
 
 class _YourEventsState extends State<YourEvents> {
-  late Employee employee;
+  Employee employee = Employee(
+      id: "",
+      name: "",
+      surname: "",
+      photoUrl: "",
+      departmentId: "",
+      teamId: "",
+      phoneNumber: "");
 
   @override
   void initState() {
@@ -73,8 +80,10 @@ class _YourEventsState extends State<YourEvents> {
                             shape: MaterialStateProperty.all<
                                 RoundedRectangleBorder>(
                               RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(30))),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(30),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -135,7 +144,11 @@ class _YourEventsState extends State<YourEvents> {
                 builder: (context, snapshots) {
                   final events = snapshots.data;
 
-                  if (events!.isEmpty) {
+                  if (events == null) {
+                    return SizedBox();
+                  }
+
+                  if (events.isEmpty) {
                     return Text(
                       "Nenhum evento encontrado :(",
                       style: TextStyle(
@@ -196,7 +209,11 @@ class _YourEventsState extends State<YourEvents> {
                 builder: (context, snapshots) {
                   final events = snapshots.data;
 
-                  if (events!.isEmpty) {
+                  if (events == null) {
+                    return SizedBox();
+                  }
+
+                  if (events.isEmpty) {
                     return Text(
                       "Nenhum evento encontrado :(",
                       style: TextStyle(
@@ -299,8 +316,8 @@ class MoreInfoDialog extends StatefulWidget {
 }
 
 class _MoreInfoDialogState extends State<MoreInfoDialog> {
-  Department department = Department(departmentName: "");
-  Team team = Team(teamName: "", employees: []);
+  Department department = Department(id: "", departmentName: "");
+  Team team = Team(id: "", teamName: "", employees: []);
   List<Employee> employees = [];
 
   @override
