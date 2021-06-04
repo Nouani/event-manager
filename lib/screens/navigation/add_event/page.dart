@@ -613,13 +613,13 @@ class _AddEventState extends State<AddEvent> {
   void submitData(Event data) {
     activeToastMessage("Processando...", Duration(seconds: 1));
 
-    /*SmsSender sender = new SmsSender();
+    /*SmsSender sender = new SmsSender();*/
     EventService.insertEvent(data).then((value) => {
           activeToastMessage(
               "Evento agendado com sucesso!", Duration(seconds: 1)),
-        });*/
+        });
 
-    EmployeeService.getEmployeesEqualDepartmentAndTeam(
+    /*EmployeeService.getEmployeesEqualDepartmentAndTeam(
             data.departmentId, data.teamId)
         .then((value) => {
               /*activeToastMessage(
@@ -631,7 +631,7 @@ class _AddEventState extends State<AddEvent> {
                     log("teste"),
                     log("Notificando => ${e.name}")
                   }),
-            });
+            });*/
 
     /*SmsSender sender = new SmsSender();
     EmployeeService.getEmployeesEqualDepartmentAndTeam(

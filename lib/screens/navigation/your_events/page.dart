@@ -190,6 +190,7 @@ class _YourEventsState extends State<YourEvents> {
               StreamBuilder<Iterable<Event>?>(
                 stream: FirebaseFirestore.instance
                     .collection("events")
+                    // .where("responsibleMeeting", isNotEqualTo: employee.id)
                     .where("departmentId", isEqualTo: employee.departmentId)
                     .where("teamId", isEqualTo: employee.teamId)
                     .snapshots()
@@ -214,6 +215,7 @@ class _YourEventsState extends State<YourEvents> {
                   }
 
                   if (events.isEmpty) {
+                    log("VAZIO");
                     return Text(
                       "Nenhum evento encontrado :(",
                       style: TextStyle(
@@ -228,6 +230,10 @@ class _YourEventsState extends State<YourEvents> {
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: events.map((e) {
+                        if (e.responsibleMeeting == employee.id) {
+                          return SizedBox();
+                        }
+
                         return _buildYourEvents(e, false);
                       }).toList(),
                     ),
@@ -320,6 +326,15 @@ class _MoreInfoDialogState extends State<MoreInfoDialog> {
   Team team = Team(id: "", teamName: "", employees: []);
   List<Employee> employees = [];
 
+  bool listContainResponsibleMeeting(List<Employee> list, Employee search) {
+    for (var item in list) {
+      if (item.id == search.id) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -339,13 +354,23 @@ class _MoreInfoDialogState extends State<MoreInfoDialog> {
     );
 
     EmployeeService.getEmployeesEqualDepartmentAndTeam(departmentId, teamId)
-        .then(
-      (value) => setState(() {
-        employees = value.toList();
-      }),
-    );
+        .then((othersEmployees) {
+      EmployeeService.getEmployeeById(widget.event.responsibleMeeting).then(
+        (employResponsible) {
+          List<Employee> data = othersEmployees.toList();
 
-    EmployeeService.getEmployeeById(widget.event.responsibleMeeting).then(
+          if (!listContainResponsibleMeeting(data, employResponsible)) {
+            data.add(employResponsible);
+          }
+          setState(() {
+            employees = data;
+          });
+        },
+      );
+    });
+
+    // if (!widget.isResponsibleMeeting) {
+    /*EmployeeService.getEmployeeById(widget.event.responsibleMeeting).then(
       (value) {
         List<Employee> data = employees;
         data.add(value);
@@ -353,7 +378,8 @@ class _MoreInfoDialogState extends State<MoreInfoDialog> {
           employees = data;
         });
       },
-    );
+    );*/
+    //}
   }
 
   @override
@@ -557,7 +583,9 @@ class _MoreInfoDialogState extends State<MoreInfoDialog> {
             style: TextStyle(
               fontWeight: FontWeight.normal,
               fontSize: 13,
-              color: Colors.grey,
+              color: otherEmployee.id == widget.event.responsibleMeeting
+                  ? Colors.red
+                  : Colors.grey,
             ),
           ),
         ],
