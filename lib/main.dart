@@ -1,6 +1,8 @@
-import 'package:evenager/screens/homePage/home_page.dart';
-import 'package:evenager/screens/signInPage/signin_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:evenager/screens/navigation/navigation.dart';
+import 'package:evenager/screens/signInPage/page.dart';
 import 'package:evenager/services/authentication_service.dart';
+import 'package:evenager/services/employee_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +28,8 @@ class MyApp extends StatelessWidget {
         )
       ],
       child: MaterialApp(
-        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        title: 'Evenager',
         theme: ThemeData(
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -43,7 +46,8 @@ class AuthenticationWrapper extends StatelessWidget {
     final user = context.watch<User?>();
 
     if (user != null) {
-      return HomePage();
+      // return HomePage();
+      return Navigation();
     }
 
     return SignInPage();
