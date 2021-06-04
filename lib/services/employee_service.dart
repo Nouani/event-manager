@@ -19,4 +19,24 @@ class EmployeeService {
           teamId: value.data()!["departmentId"]);
     });
   }
+
+  static Future<Iterable<Employee>> getEmployeesEqualDepartmentAndTeam(
+      String departmentId, String teamId) async {
+    return FirebaseFirestore.instance
+        .collection("employees")
+        .where("departmentId", isEqualTo: departmentId)
+        .where("teamId", isEqualTo: teamId)
+        .get()
+        .then(
+          (value) => value.docs.map((e) {
+            return Employee(
+                id: e.id,
+                name: e.data()["name"],
+                surname: e.data()["surname"],
+                photoUrl: e.data()["photoUrl"],
+                departmentId: e.data()["departmentId"],
+                teamId: e.data()["departmentId"]);
+          }),
+        );
+  }
 }

@@ -412,7 +412,7 @@ class _AddEventState extends State<AddEvent> {
               DepartmentService.getDepartmentById(dropdownDepartmentId)
                   .then((value) {
                 setState(() {
-                  dropdownDepartmentSelected = value!["departmentName"];
+                  dropdownDepartmentSelected = value.departmentName;
                 });
               });
             },
@@ -479,7 +479,7 @@ class _AddEventState extends State<AddEvent> {
                       dropdownDepartmentId, dropdownTeamId)
                   .then((value) => {
                         setState(() {
-                          dropdownTeamSelected = value!["teamName"];
+                          dropdownTeamSelected = value.teamName;
                         })
                       });
             },
