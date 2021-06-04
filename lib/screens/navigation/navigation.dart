@@ -1,7 +1,11 @@
+import 'dart:developer';
+
 import 'package:evenager/screens/navigation/add_event/page.dart';
 import 'package:evenager/screens/navigation/your_events/page.dart';
+import 'package:evenager/services/authentication_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Navigation extends StatefulWidget {
   @override
@@ -23,11 +27,13 @@ class _NavigationState extends State<Navigation> {
 
   @override
   Widget build(BuildContext context) {
+    log("TESTE");
+    log(context.read<AuthenticationService>().userUid.toString());
     return Scaffold(
-      appBar: AppBar(
+      /*appBar: AppBar(
         title: Text("Evenager"),
         centerTitle: true,
-      ),
+      ),*/
       body: _widgetOptions[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Color.fromRGBO(130, 25, 227, 1),

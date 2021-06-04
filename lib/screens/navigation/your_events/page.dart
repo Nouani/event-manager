@@ -15,8 +15,24 @@ class YourEvents extends StatelessWidget {
   }
 
   Widget build(BuildContext context) {
-    _getEmployee(context);
-
-    return Text("Events");
+    return Container(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Agendar Evento"),
+            Text("Agendar Evento"),
+            Text("Agendar Evento"),
+            ElevatedButton(
+              onPressed: () {
+                context.read<AuthenticationService>().signOut();
+              },
+              child: Text("Sign out"),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

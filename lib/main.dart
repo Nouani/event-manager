@@ -22,9 +22,6 @@ class MyApp extends StatelessWidget {
         Provider<AuthenticationService>(
           create: (_) => AuthenticationService(FirebaseAuth.instance),
         ),
-        Provider<EmployeeService>(
-          create: (_) => EmployeeService(FirebaseFirestore.instance),
-        ),
         StreamProvider(
           create: (context) =>
               context.read<AuthenticationService>().authStateChanges,
