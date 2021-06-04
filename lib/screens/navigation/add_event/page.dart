@@ -222,6 +222,7 @@ class _AddEventState extends State<AddEvent> {
                         .userUid
                         .toString());
                     final data = new Event(
+                      id: "",
                       responsibleMeeting: context
                           .read<AuthenticationService>()
                           .userUid

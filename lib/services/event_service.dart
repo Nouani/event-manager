@@ -16,4 +16,8 @@ class EventService {
       "teamId": data.teamId,
     });
   }
+
+  static Future<void> removeEvent(String id) {
+    return FirebaseFirestore.instance.collection("events").doc(id).delete();
+  }
 }

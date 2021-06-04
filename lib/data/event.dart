@@ -1,4 +1,5 @@
 class Event {
+  final String id;
   final String responsibleMeeting;
   final String eventType;
   final String eventLocation;
@@ -8,6 +9,7 @@ class Event {
   final String teamId;
 
   Event({
+    required this.id,
     required this.responsibleMeeting,
     required this.eventType,
     required this.eventLocation,
@@ -19,6 +21,7 @@ class Event {
 
   @override
   List<Object?> get props => [
+        id,
         responsibleMeeting,
         eventType,
         eventLocation,

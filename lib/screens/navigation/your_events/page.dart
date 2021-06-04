@@ -8,6 +8,7 @@ import 'package:evenager/data/team.dart';
 import 'package:evenager/services/authentication_service.dart';
 import 'package:evenager/services/department_service.dart';
 import 'package:evenager/services/employee_service.dart';
+import 'package:evenager/services/event_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -103,6 +104,7 @@ class _YourEventsState extends State<YourEvents> {
                       .map((event) {
                     return event.docs.map((e) {
                       return Event(
+                          id: e.id,
                           responsibleMeeting: e.data()["responsibleMeeting"],
                           eventType: e.data()["eventType"],
                           eventLocation: e.data()["eventLocation"],
@@ -355,7 +357,10 @@ class _MoreInfoDialogState extends State<MoreInfoDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        EventService.removeEvent(widget.event.id)
+                            .then((value) => Navigator.of(context).pop());
+                      },
                       child: Icon(
                         Icons.delete,
                       ),
